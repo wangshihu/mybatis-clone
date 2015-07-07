@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding">
+    <file url="file://$PROJECT_DIR$" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/java/com/huihui/builder/xml/mybatis-3-config.dtd" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/java/com/huihui/builder/xml/mybatis-3-mapper.dtd" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/test/java/com/huihui/domain/Blog.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/test/java/com/huihui/mapper/dao/BlogMapper.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/test/java/com/huihui/xmlParsing/Dom4jTest.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/test/resources/com/huihui/xmlParsing/Dom4jTest.xml" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/test/resources/com/huihui/xmlParsing/blogMapper.xml" charset="UTF-8" />
+  </component>
+</project>
