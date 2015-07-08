@@ -15,6 +15,8 @@
  */
 package com.huihui.type;
 
+import com.huihui.exceptions.TypeException;
+
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 

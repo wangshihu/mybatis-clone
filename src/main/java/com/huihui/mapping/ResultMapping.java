@@ -11,4 +11,12 @@ public class ResultMapping {
         this.property = property;
         this.colum = colum;
     }
+
+    public String getProperty() {
+        return property;
+    }
+
+    public String getColum() {
+        return colum;
+    }
 }

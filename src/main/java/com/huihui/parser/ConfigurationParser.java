@@ -2,6 +2,7 @@ package com.huihui.parser;
 
 import com.huihui.exceptions.XMLFormatException;
 import com.huihui.io.Resources;
+import com.huihui.io.Resourse;
 import com.huihui.session.Configuration;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.dom4j.Document;
@@ -124,10 +125,11 @@ public class ConfigurationParser {
 
     private void parsingMapper(Element node) {
         if(node.attribute("resource")!=null){//定位Resource资源
-            String resource = node.attributeValue("resource");
-            configuration.registryMapperSources("resource",resource);//注册加载过的Resource
             try {
-                new MapperParser(Resources.getResourceAsStream(resource),configuration).parsing();
+                String resourceName = node.attributeValue("resource");
+                Resourse resource = new Resourse(Resources.getResourceAsStream(resourceName),resourceName);
+                configuration.registryMapperSources("resource",resource);//注册加载过的Resource
+                new MapperParser(resource,configuration).parsing();
             } catch (IOException e) {
                 e.printStackTrace();
             }

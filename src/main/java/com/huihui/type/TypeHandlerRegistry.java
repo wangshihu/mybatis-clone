@@ -33,4 +33,9 @@ public class TypeHandlerRegistry {
         return TYPE_HANDLER_REGISTRY.get(type);
     }
 
+    public Class<?> getJdbcTypeClass(JdbcType type){
+        return JDBCTYPE_HANDLER_REGISTRY.get(type);
+    }
+
+
 }

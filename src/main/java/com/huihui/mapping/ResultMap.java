@@ -1,5 +1,6 @@
 package com.huihui.mapping;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -8,7 +9,7 @@ import java.util.List;
 public class ResultMap {
     private String id;
     private Class<?> type;
-    private List<ResultMapping> resultMappings;
+    private List<ResultMapping> resultMappings = new ArrayList<>();
 
     public ResultMap( String id,Class<?> type) {
         this.type = type;
@@ -34,5 +35,9 @@ public class ResultMap {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public List<ResultMapping> getResultMappings() {
+        return resultMappings;
     }
 }

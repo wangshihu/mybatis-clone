@@ -5,13 +5,14 @@ import com.huihui.binding.MapperProxyFactory;
 import com.huihui.binding.MapperRegistry;
 import com.huihui.exceptions.BindingException;
 import com.huihui.io.Resources;
+import com.huihui.io.Resourse;
 import com.huihui.mapping.MappedStatement;
 import com.huihui.mapping.ResultMap;
+import com.huihui.type.JdbcType;
 import com.huihui.type.TypeHandler;
 import com.huihui.type.TypeHandlerRegistry;
 
 import javax.sql.DataSource;
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,7 +28,7 @@ public class Configuration {
     //映射statement注册器
     private Map<String,MappedStatement> mappedStatementRegistry = new HashMap<>();
     //加载过的资源
-    private Map<String,String> loadMapperReources = new HashMap<>();
+    private Map<String,Resourse> loadMapperReources = new HashMap<>();
     //映射的类型（命名空间）
     private MapperRegistry mapperRegistry = new MapperRegistry(this);
     //映射的ResultMap
@@ -53,7 +54,7 @@ public class Configuration {
      * @param type
      * @param resource
      */
-    public void registryMapperSources(String type ,String resource){
+    public void registryMapperSources(String type ,Resourse resource){
         loadMapperReources.put(type,resource);
     }
 
@@ -74,7 +75,7 @@ public class Configuration {
         return typeAliasRegistry.getAliasClass(name);
     }
 
-    public void registryMapperFactory(String className, InputStream resource){
+    public void registryMapperFactory(String className, Resourse resource){
         Class<?> clazz = null;
         try {
             clazz = Resources.classForName(className);
@@ -94,8 +95,18 @@ public class Configuration {
         resultMapRegistry.put(id,resultMap);
     }
 
-    public TypeHandler getTypeHandler(Class<? extends Object> type) {
+    public ResultMap getResultMap(String id){
+        return resultMapRegistry.get(id);
+    }
 
+    public TypeHandler getTypeHandler(Class<? extends Object> type) {
         return handlerRegistry.getTypeHandler(type);
     }
+
+    public Class<?> getJdbcTypeClass(JdbcType type){
+        return handlerRegistry.getJdbcTypeClass(type);
+    }
+
+
+
 }

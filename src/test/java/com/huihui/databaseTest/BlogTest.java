@@ -13,6 +13,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -33,20 +34,21 @@ public class BlogTest {
     @Test
     public void testAdd(){
         Map<String,Object> map = new HashMap<String, Object>();
-        map.put("title","年华");
-        map.put("author_id", 2);
+        map.put("title","年华5");
+        map.put("author_id", 5);
         mapper.insert(map);
     }
-//    @Test
-//    public void testSelect(){
-//        List<Blog> list = mapper.findAll();
-//        System.out.println(list);
-//    }
+    @Test
+    public void testSelect(){
+        List<Blog> list = mapper.findAll();
+        System.out.println(list);
+    }
     @Test
     public void testSelectOne(){
         Map<String,Object> map = new HashMap<>();
-        map.put("id",1);
+        map.put("id",2);
         Blog blog = mapper.findById(map);
+        System.out.println(blog);
     }
 
 
