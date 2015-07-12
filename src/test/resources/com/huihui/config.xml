@@ -3,9 +3,8 @@
         "http://mybatis.org/dtd/mybatis-3-config.dtd">
 <configuration>
 <typeAliases>
-    <typeAlias alias="Blog" type="com.huihui.domain.Blog"/>
+    <package name="com.huihui.domain"></package>
 </typeAliases>
-
 <environments default="development">
     <environment id="development">
         <transactionManager type="JDBC"/>
@@ -20,5 +19,6 @@
 
 <mappers>
     <mapper resource="com/huihui/mapper/xml/blogMapper.xml"/>
+    <mapper resource="com/huihui/mapper/xml/authorMapper.xml"/>
 </mappers>
 </configuration>

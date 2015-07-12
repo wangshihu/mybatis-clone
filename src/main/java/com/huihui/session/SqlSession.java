@@ -2,6 +2,8 @@ package com.huihui.session;
 
 import com.huihui.exceptions.ExceptionFactory;
 import com.huihui.exceptions.ResultMapException;
+import com.huihui.excutor.DefaultExcutor;
+import com.huihui.excutor.Excutor;
 import com.huihui.mapping.*;
 import com.huihui.type.JdbcType;
 import com.huihui.type.TypeHandler;
@@ -20,9 +22,11 @@ import java.util.Map;
  */
 public class SqlSession {
     Configuration configuration;
+    private Excutor excutor;
 
     public SqlSession(Configuration configuration) {
         this.configuration = configuration;
+        this.excutor = new DefaultExcutor();
     }
 
     public <T> T getMapper(Class<T> type) {
@@ -53,21 +57,21 @@ public class SqlSession {
         return pstmt;
     }
 
+    /**
+     * 查询单个
+     */
     public Object selectOne(Connection connection, Object[] args, MappedStatement mappedStatement) {
         PreparedStatement pstmt = getPreparedStatement(connection, args, mappedStatement.getBoudSQL());
         ResultMap resultMap = mappedStatement.getResultMap();
         Object result = null;
         try {
             ResultSet resultSet = pstmt.executeQuery();
-            result = resultMap.getType().newInstance();
             if (mappedStatement.isUseResultMap()) {
                 while (resultSet.next()) {
-                    wrapResultForResultMap(resultMap, resultSet, result);
+                    result = wrapResultMap(resultMap, resultSet);
                 }
             }
         } catch (SQLException e) {
-            ExceptionFactory.wrapException(" ", e);
-        } catch (Exception e) {
             ExceptionFactory.wrapException(" ", e);
         }
         return result;
@@ -81,14 +85,11 @@ public class SqlSession {
             ResultSet resultSet = pstmt.executeQuery();
             if (mappedStatement.isUseResultMap()) {
                 while (resultSet.next()) {
-                    Object result = resultMap.getType().newInstance();
-                    wrapResultForResultMap(resultMap, resultSet, result);
+                    Object result = wrapResultMap(resultMap, resultSet);
                     resultList.add(result);
                 }
             }
         } catch (SQLException e) {
-            ExceptionFactory.wrapException(" ", e);
-        } catch (Exception e) {
             ExceptionFactory.wrapException(" ", e);
         }
 
@@ -107,26 +108,30 @@ public class SqlSession {
         return result;
     }
 
-
-    public void wrapResultForResultMap(ResultMap resultMap, ResultSet resultSet, Object result) {
+    public Object wrapResultMap(ResultMap resultMap, ResultSet resultSet) {
+        Object result = null;
         try {
-            ResultSetWrapper wrapper = new ResultSetWrapper(resultSet);
+            result = resultMap.getType().newInstance();
+            wrapResultMap(resultMap, resultSet, result);
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
 
-            for (ResultMapping mapping : resultMap.getResultMappings()) {
-                int columnIndex = wrapper.getResultColumns().indexOf(mapping.getColum());
-                if (columnIndex == -1)
-                    throw new ResultMapException("connot found column");
-
-                JdbcType jdbcType = wrapper.getJdbcTypes().get(columnIndex);
-                Class<?> typeClass = configuration.getJdbcTypeClass(jdbcType);
-                TypeHandler handler = configuration.getTypeHandler(typeClass);
-
-                Object value = handler.getResult(wrapper.getResultSet(), mapping.getColum());
-                setProperty(result, mapping.getProperty(), value);
+    public void wrapResultMap(ResultMap resultMap, ResultSet resultSet, Object result) {
+        ResultSetWrapper wrapper = new ResultSetWrapper(resultSet);
+        for (ResultMapping mapping : resultMap.getResultMappings()) {
+            Object value = null;
+            if (mapping.getNestedMapId() == null) {//如果没有nestedMap简单设值
+                value = excutor.getSimpleProperty(wrapper, mapping);
+            } else {//如果有nestedMap
+                ResultMap nestedMap = configuration.getResultMap(mapping.getNestedMapId());
+                value = wrapResultMap(nestedMap, resultSet);
             }
-
-        } catch (SQLException e) {
-            ExceptionFactory.wrapException(" ", e);
+            setProperty(result, mapping.getProperty(), value);
         }
     }
 

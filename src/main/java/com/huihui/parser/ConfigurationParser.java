@@ -1,9 +1,12 @@
 package com.huihui.parser;
 
+import com.huihui.exceptions.ExceptionFactory;
 import com.huihui.exceptions.XMLFormatException;
+import com.huihui.io.ResolveUtil;
 import com.huihui.io.Resources;
 import com.huihui.io.Resourse;
 import com.huihui.session.Configuration;
+import com.huihui.session.ErrorContext;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
@@ -13,7 +16,9 @@ import org.dom4j.io.SAXReader;
 import javax.sql.DataSource;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * Created by hadoop on 2015/6/30 0030.
@@ -23,6 +28,7 @@ public class ConfigurationParser {
     private Configuration configuration;
 
     public ConfigurationParser(InputStream resourece, Configuration configuration){
+        ErrorContext.instance().resource("SQL Mapper Configuration");
         this.configuration = configuration;
         this.resourece = resourece;
     }
@@ -30,50 +36,75 @@ public class ConfigurationParser {
         try {
             SAXReader reader = new SAXReader();
             Document document = reader.read(resourece);
-            Element node = document.getRootElement();
+            Element root = document.getRootElement();
+            ParsingConfigurationChild(root);
+        }catch (DocumentException e){
+            ExceptionFactory.wrapException("error Parsing root element",e);
+        }
+    }
+    public void ParsingConfigurationChild(Element root) {
+        List<Element> typeAliasesElements = new ArrayList<>();
+        List<Element> environmentsList = new ArrayList<>();
+        List<Element> mappersList = new ArrayList<>();
+        Iterator<Element> it = root.elementIterator();
+        while(it.hasNext()){
+            Element child = it.next();
+            String name = child.getName();
+            if("typeAliases".equals(name)){
+                typeAliasesElements.add(child);
+            }else if("environments".equals(name)){
+               environmentsList.add(child);
+            }else if("mappers".equals(name)){
+                mappersList.add(child);
+            }
+        }
+        parsingTypeAliases(typeAliasesElements);
+        parsingEnvironments(environmentsList);
+        parsingMappers(mappersList);
+    }
+
+    /**
+     * 解析别名
+     */
+    private void parsingTypeAliases(List<Element> nodes) {
+        for(Element node:nodes){
             Iterator<Element> it = node.elementIterator();
             while(it.hasNext()){
                 Element child = it.next();
-                ParsingConfigurationChild(child);
+                pasingTypeAlias(child);
             }
-        }catch (DocumentException e){
-            e.printStackTrace();
         }
 
-    }
-    public void ParsingConfigurationChild(Element child) {
-        String name = child.getName();
-        if("typeAliases".equals(name)){
-            parsingTypeAliases(child);
-        }else if("environments".equals(name)){
-            parsingEnvironments(child);
-        }else if("mappers".equals(name)){
-            parsingMappers(child);
-        }
-
-    }
-    private void parsingTypeAliases(Element node) {
-        Iterator<Element> it = node.elementIterator();
-        while(it.hasNext()){
-            Element child = it.next();
-            pasingTypeAlias(child);
-        }
     }
 
     private void pasingTypeAlias(Element child) {
-        String name = child.attributeValue("alias");
-        String className = child.attributeValue("type");
-        if(name==null||className==null)
-            throw new XMLFormatException(resourece+" alias or type connot be null");
-        configuration.registryAlias(name,className);
+        String name = child.getName();
+        if("package".equals(name)){//解析package
+            String packageName = child.attributeValue("name");
+            List<Class> classes = ResolveUtil.resolvePackage(packageName);
+            for(Class type:classes){
+                String alias = type.getSimpleName();
+                configuration.registryAlias(alias,type);
+            }
+        }else if("typeAlias".equals(name)){
+            String alias = child.attributeValue("alias");
+            String type = child.attributeValue("type");
+            if(name==null||type==null)
+                throw new XMLFormatException(ErrorContext.instance()+" alias or type connot be null");
+            configuration.registryAlias(alias,type);
+        }
+
     }
 
-    private void parsingEnvironments(Element node) {
-        Iterator<Element> it = node.elementIterator();
-        while(it.hasNext()){
-            Element child = it.next();
-            parsingEnvironment(child);
+    private void parsingEnvironments(List<Element> nodes) {
+        for(Element node:nodes){
+            Iterator<Element> it = node.elementIterator();
+            while(it.hasNext()){
+                Element child = it.next();
+                parsingEnvironment(child);
+            }
         }
+
     }
 
     private void parsingEnvironment(Element node) {
@@ -115,11 +146,13 @@ public class ConfigurationParser {
         }
     }
 
-    private void parsingMappers(Element node) {
-        Iterator<Element> it = node.elementIterator();
-        while(it.hasNext()){
-            Element child = it.next();
-            parsingMapper(child);
+    private void parsingMappers(List<Element> nodes) {
+        for(Element node:nodes){
+            Iterator<Element> it = node.elementIterator();
+            while(it.hasNext()){
+                Element child = it.next();
+                parsingMapper(child);
+            }
         }
     }
 
@@ -136,8 +169,6 @@ public class ConfigurationParser {
 
         }
     }
-
-
 
 
 }

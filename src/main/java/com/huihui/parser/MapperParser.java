@@ -3,10 +3,7 @@ package com.huihui.parser;
 import com.huihui.exceptions.BindingException;
 import com.huihui.exceptions.XMLFormatException;
 import com.huihui.io.Resourse;
-import com.huihui.mapping.BoundSQLSource;
-import com.huihui.mapping.MappedStatement;
-import com.huihui.mapping.ResultMap;
-import com.huihui.mapping.SqlCommandType;
+import com.huihui.mapping.*;
 import com.huihui.session.Configuration;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
@@ -68,7 +65,8 @@ public class MapperParser {
         if("insert".equals(type)||"update".equals(type)||"delete".equals(type)||"select".equals(type)){
             idusCache.add(node);
         }else if("resultMap".equals(type)){
-            parsingResultMap(node);
+            String id = node.attributeValue("id");
+            parsingResultMap(node,id);
         }
     }
 
@@ -76,34 +74,32 @@ public class MapperParser {
      * 解析ResultMap
      * @param node
      */
-    private void parsingResultMap(Element node) {
-        String type = node.attributeValue("type");
-        String id = node.attributeValue("id");
-        if(id==null)
-            throw new BindingException(resource+" resultMap id connot be null");
-        Class<?> clazz = configuration.getAliasClass(type);
-        if(clazz==null)
-            throw new BindingException(resource+" "+type+" cannot be found");
-        ResultMap resultMap = new ResultMap(id,clazz);
-        configuration.registryResultMap(id,resultMap);
+    private ResultMap parsingResultMap(Element node,String id) {
+        String type = XmlBuilderAssist.getMatchType(node);
+        ResultMap resultMap = new ResultMap.Builder(configuration,id,type).build();
         Iterator<Element> it = node.elementIterator();
         while (it.hasNext()){
             Element child = it.next();
             parsingResultMapChild(resultMap,child);
         }
+        configuration.registryResultMap(id,resultMap);
+        return resultMap;
     }
     /**
      * 解析ResultMap的子节点
      */
     private void parsingResultMapChild(ResultMap resultMap, Element node) {
         String nodeName = node.getName();
-        if("result".equals(nodeName)||"id".equals(nodeName)){
-            String property = node.attributeValue("property");
-            String column = node.attributeValue("column");
-            if(property==null||column==null)
-                throw new BindingException(resource+" "+resultMap.getId()+" resultMap colum or property cannot be null ");
-            resultMap.registryResultMapping(property,column);
+        String property = node.attributeValue("property");
+        String column = node.attributeValue("column");
+        ResultMap nestedResultMap = null;
+        if("association".equals(nodeName)){
+            resultMap.hasNestedMap();
+            String id = resultMap.getId()+"_association["+property+"]";
+            nestedResultMap = parsingResultMap(node,id);
         }
+        ResultMapping resultMapping = new ResultMapping.Builder(property,column,nestedResultMap).builder();
+        resultMap.registryResultMapping(property,resultMapping);
     }
 
 
@@ -119,8 +115,6 @@ public class MapperParser {
             throw new XMLFormatException(resource.toString()+" id cannot be null");
 
         Class<?> parameterType = configuration.getAliasClass(node.attributeValue("parameterType"));
-
-
 
         String id = nameSpace+"."+idStr;
         BoundSQLSource boundSQL = parsingSQL(node.getText().trim());

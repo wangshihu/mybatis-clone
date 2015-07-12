@@ -70,6 +70,10 @@ public class Configuration {
     public void registryAlias(String name,String className){
         typeAliasRegistry.registryAlias(name, className);
     }
+    public void registryAlias(String name,Class clazz){
+        typeAliasRegistry.registryAlias(name, clazz);
+    }
+
 
     public Class<?> getAliasClass(String name){
         return typeAliasRegistry.getAliasClass(name);

@@ -19,20 +19,24 @@ public class TypeAliasRegistry{
         registryAlias(null,Void.class);
     }
 
-    public  void registryAlias(String name,Class<?> clazz){
+    public void registryAlias(String name,Class<?> clazz){
+        if(name!=null)
+            name = name.toLowerCase();
         ALIASMAP.put(name, clazz);
     }
 
     public void registryAlias(String name,String className){
         try {
             Class<?> clazz = Resources.classForName(className);
-            ALIASMAP.put(name, clazz);
+            registryAlias(name,clazz);
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
     }
 
     public Class<?> getAliasClass(String name){
+        if(name!=null)
+            name = name.toLowerCase();
         return ALIASMAP.get(name);
     }
 
