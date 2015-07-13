@@ -96,6 +96,7 @@ public class MapperParser {
         if("association".equals(nodeName)){
             resultMap.hasNestedMap();
             String id = resultMap.getId()+"_association["+property+"]";
+
             nestedResultMap = parsingResultMap(node,id);
         }
         ResultMapping resultMapping = new ResultMapping.Builder(property,column,nestedResultMap).builder();

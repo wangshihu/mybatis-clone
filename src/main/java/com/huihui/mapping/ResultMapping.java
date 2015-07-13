@@ -21,9 +21,11 @@ public class ResultMapping {
         public Builder(String property, String column, ResultMap nestedResultMap){
             resultMapping.setColum(column);
             resultMapping.setProperty(property);
-            resultMapping.setNestedMapId(nestedResultMap.getId());
-            if(property ==null||column==null)
-                throw new BindingException(ErrorContext.instance()+" resultMap colum or property cannot be null ");
+            if(nestedResultMap!=null){
+                resultMapping.setNestedMapId(nestedResultMap.getId());
+            }
+            if(property ==null)
+                throw new BindingException(ErrorContext.instance()+" resultMap property cannot be null ");
         }
         public ResultMapping builder(){
             return resultMapping;

@@ -51,5 +51,12 @@ public class BlogTest {
         System.out.println(blog);
     }
 
+    @Test
+    public void testNestedMap(){
+        int id =2;
+        Blog blog = mapper.testNestedMap(id);
+        System.out.println(blog);
+    }
+
 
 }

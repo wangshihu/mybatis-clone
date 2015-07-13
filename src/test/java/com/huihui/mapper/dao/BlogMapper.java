@@ -9,9 +9,11 @@ import java.util.Map;
  * Created by hadoop on 2015/6/28 0028.
  */
 public interface BlogMapper {
-    public void insert(Map<String,Object> map);
+     void insert(Map<String,Object> map);
 
-    public List<Blog> findAll();
+    List<Blog> findAll();
 
-    public Blog findById(Map<String, Object> map);
+    Blog findById(Map<String, Object> map);
+
+    Blog testNestedMap(int id);
 }

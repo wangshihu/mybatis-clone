@@ -54,9 +54,11 @@ public class ResultMap {
         public Builder(Configuration configuration,String id,String type){
             if(id==null)
                 throw new BindingException(ErrorContext.instance()+" resultMap id connot be null");
+            resultMap.setId(id);
             Class<?> clazz = configuration.getAliasClass(type);
             if(clazz==null)
                 throw new BindingException(ErrorContext.instance()+" "+type+" cannot be found");
+            resultMap.setType(clazz);
         }
         public ResultMap build(){
             return resultMap;

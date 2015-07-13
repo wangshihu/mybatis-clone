@@ -15,6 +15,8 @@
  */
 package com.huihui.exceptions;
 
+import com.huihui.session.ErrorContext;
+
 /**
  * @author huihui
  */
@@ -26,11 +28,11 @@ public class PersistenceException extends RuntimeException {
   }
 
   public PersistenceException(String message) {
-    super(message);
+    super(ErrorContext.instance()+"\n"+message);
   }
 
   public PersistenceException(String message, Throwable cause) {
-    super(message, cause);
+    super(ErrorContext.instance()+"\n"+message, cause);
   }
 
   public PersistenceException(Throwable cause) {

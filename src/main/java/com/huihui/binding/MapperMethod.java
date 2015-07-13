@@ -5,6 +5,7 @@ import com.huihui.exceptions.ExceptionFactory;
 import com.huihui.mapping.MappedStatement;
 import com.huihui.mapping.SqlCommandType;
 import com.huihui.session.Configuration;
+import com.huihui.session.ErrorContext;
 import com.huihui.session.SqlSession;
 
 import java.lang.reflect.Method;
@@ -23,6 +24,7 @@ public class MapperMethod {
     Configuration configuration;
 
     public MapperMethod(Method method,Class<?>mapperInterface,SqlSession sqlSession){
+        ErrorContext.instance().resource(mapperInterface.getName()+"excute mapperMethod");
         this.sqlSession = sqlSession;
         this.method = new MethodSignature(method);
         this.configuration = sqlSession.getConfiguration();
@@ -93,6 +95,22 @@ public class MapperMethod {
             this.returnType = method.getReturnType();
             this.returnsVoid = Void.class.isAssignableFrom(returnType);
             this.returnsMany = Collection.class.isAssignableFrom(returnType);
+        }
+
+        public Method getMethod() {
+            return method;
+        }
+
+        public boolean isReturnsMany() {
+            return returnsMany;
+        }
+
+        public boolean isReturnsVoid() {
+            return returnsVoid;
+        }
+
+        public Class<?> getReturnType() {
+            return returnType;
         }
     }
 }

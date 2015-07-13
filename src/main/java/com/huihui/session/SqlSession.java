@@ -1,11 +1,10 @@
 package com.huihui.session;
 
 import com.huihui.exceptions.ExceptionFactory;
-import com.huihui.exceptions.ResultMapException;
+import com.huihui.exceptions.PersistenceException;
 import com.huihui.excutor.DefaultExcutor;
 import com.huihui.excutor.Excutor;
 import com.huihui.mapping.*;
-import com.huihui.type.JdbcType;
 import com.huihui.type.TypeHandler;
 import org.apache.commons.beanutils.PropertyUtils;
 
@@ -26,7 +25,7 @@ public class SqlSession {
 
     public SqlSession(Configuration configuration) {
         this.configuration = configuration;
-        this.excutor = new DefaultExcutor();
+        this.excutor = new DefaultExcutor(configuration);
     }
 
     public <T> T getMapper(Class<T> type) {
@@ -42,14 +41,27 @@ public class SqlSession {
         try {
             pstmt = connection.prepareStatement(boundSQL.getSql());
             if (!boundSQL.getParameterList().isEmpty()) {//如果parameterList不为空填充参数
-                Map<String, Object> map = (Map<String, Object>) args[0];
+                if(args.length!=1)//@TODO 多参数方法。
+                    throw new PersistenceException("do not support for args.length>1 method");
                 int i = 1;
-                for (String parameter : boundSQL.getParameterList()) {
-                    Object parameterValue = map.get(parameter);
-                    TypeHandler handler = configuration.getTypeHandler(parameterValue.getClass());
-                    handler.setParameter(pstmt, i, parameterValue, null);
-                    i++;
+                if(args[0] instanceof Map){//如果能转换成map,多参数
+                    Map<String,Object> map = (Map<String, Object>) args[0];
+                    for (String parameter : boundSQL.getParameterList()) {
+                        Object parameterValue = map.get(parameter);
+                        TypeHandler handler = configuration.getTypeHandler(parameterValue.getClass());
+                        handler.setParameter(pstmt, i, parameterValue, null);
+                        i++;
+                    }
+                }else {
+                    if(boundSQL.getParameterList().size()==1){
+                        Object parameterValue = args[0];
+                        TypeHandler handler = configuration.getTypeHandler(parameterValue.getClass());
+                        handler.setParameter(pstmt, i, parameterValue, null);
+                    }else{//如果需要的parameter数量不等于提供的参数。
+                        throw new PersistenceException("require parameters not equals parameters");
+                    }
                 }
+
             }
         } catch (SQLException e) {
             throw ExceptionFactory.wrapException("", e);

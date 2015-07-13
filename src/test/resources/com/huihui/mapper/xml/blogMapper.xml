@@ -15,11 +15,7 @@
             <result property="password" column="password"></result>
         </association>
     </resultMap>
-    <resultMap id="testBlog" type="Blog">
-        <id property="id" column="id"></id>
-        <result property="title" column="title"></result>
-    </resultMap>
-    <select id="findById" parameterType="int" resultMap="baseBlog">
+    <select id="findById" parameterType="HashMap" resultMap="baseBlog">
         SELECT b.*,a.username username,a.password password
         from _blog b join _author a on b.author_id = a.id
         where b.id = #{id}
@@ -27,6 +23,25 @@
 
     <select id="findAll" resultMap="baseBlog">
         SELECT * from _blog;
+    </select>
+
+    <!--NestedMap,-->
+    <resultMap id="nestedMap" type="Blog">
+        <id property="id" column="id"></id>
+        <result property="title" column="title"></result>
+        <association property="author" javaType="Author" >
+            <id property="id" column="author_id"></id>
+            <result property="username" column="username"></result>
+            <result property="password" column="password"></result>
+            <!--测试循环内嵌-->
+            <association property="blog" resultMap="nestedMap"></association>
+        </association>
+    </resultMap>
+    <!--nestedMap测试sql-->
+    <select id="testNestedMap" parameterType="int" resultMap="nestedMap">
+        SELECT b.*,a.username username,a.password password
+        from _blog b join _author a on b.author_id = a.id
+        where b.id = #{id}
     </select>
 
 
