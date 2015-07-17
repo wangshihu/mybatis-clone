@@ -12,6 +12,10 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by hadoop on 2015/7/13 0013.
@@ -32,6 +36,15 @@ public class AuthorTest {
         int id = 1;
         Author author = mapper.testOneParameter(id);
         Assert.assertEquals("id==1",author.getId(),1);
-
+    }
+    @Test
+    public void testInsertList(){
+        List<Author> authors = new ArrayList<>();
+        for(int i=1;i<4;i++){
+            authors.add(new Author(String.valueOf(i),"d"+i,i));
+        }
+        Map<String,Object> map = new HashMap<>();
+        map.put("authors",authors);
+        mapper.testInsertList(map);
     }
 }

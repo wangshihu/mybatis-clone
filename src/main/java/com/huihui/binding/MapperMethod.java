@@ -3,7 +3,7 @@ package com.huihui.binding;
 import com.huihui.exceptions.BindingException;
 import com.huihui.exceptions.ExceptionFactory;
 import com.huihui.mapping.MappedStatement;
-import com.huihui.mapping.SqlCommandType;
+import com.huihui.mapping.sql.SqlCommandType;
 import com.huihui.session.Configuration;
 import com.huihui.session.ErrorContext;
 import com.huihui.session.SqlSession;
@@ -43,13 +43,16 @@ public class MapperMethod {
         Object result = null;
         if(conmmand.statement.getType()== SqlCommandType.INSERT){
             result = sqlSession.insert(connection,args,conmmand.statement);
+        }else if(conmmand.statement.getType()==SqlCommandType.DELETE){
+            result = sqlSession.delete(connection,args,conmmand.statement);
+        }else if(conmmand.statement.getType()==SqlCommandType.UPDATE){
+            result = sqlSession.update(connection,args,conmmand.statement);
         }else if(conmmand.statement.getType()==SqlCommandType.SELECT){
             if(method.returnsMany){
                 result = sqlSession.selectMany(connection,args,conmmand.statement);
             }else {
                 result = sqlSession.selectOne(connection,args,conmmand.statement);
             }
-
         }
         return result;
     }

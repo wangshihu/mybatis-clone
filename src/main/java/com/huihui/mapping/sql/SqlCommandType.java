@@ -1,4 +1,4 @@
-package com.huihui.mapping;
+package com.huihui.mapping.sql;
 
 /**
  * Created by hadoop on 2015/7/6 0006.

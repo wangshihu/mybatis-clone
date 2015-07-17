@@ -18,7 +18,7 @@
 </environments>
 
 <mappers>
-    <mapper resource="com/huihui/mapper/xml/blogMapper.xml"/>
     <mapper resource="com/huihui/mapper/xml/authorMapper.xml"/>
+    <mapper resource="com/huihui/mapper/xml/blogMapper.xml"/>
 </mappers>
 </configuration>

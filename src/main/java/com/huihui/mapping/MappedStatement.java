@@ -1,5 +1,10 @@
 package com.huihui.mapping;
 
+import com.huihui.mapping.sql.BoundSql;
+import com.huihui.mapping.sql.SqlCommandType;
+import com.huihui.mapping.sql.node.SqlSource;
+import com.huihui.session.DynamincContext;
+
 /**
  * Created by hadoop on 2015/7/1 0001.
  */
@@ -7,7 +12,8 @@ public class MappedStatement {
     SqlCommandType type;
     Class<?> parameterType;
     Class<?> resultType;
-    BoundSQLSource boudSQL;
+    SqlSource sqlSource;
+
     String id;
 
     ResultMap resultMap;
@@ -20,10 +26,10 @@ public class MappedStatement {
     public MappedStatement() {
     }
 
-    public MappedStatement(SqlCommandType type, Class<?> parameterType, BoundSQLSource boudSQL, String id) {
+    public MappedStatement(SqlCommandType type, Class<?> parameterType, SqlSource sqlSource, String id) {
         this.type = type;
         this.parameterType = parameterType;
-        this.boudSQL = boudSQL;
+        this.sqlSource = sqlSource;
         this.id = id;
     }
 
@@ -35,20 +41,16 @@ public class MappedStatement {
         this.type = type;
     }
 
-    public Class<?> getParameterType() {
-        return parameterType;
+
+    public BoundSql getBoudSQL(DynamincContext context) {
+
+      return  sqlSource.parsing(context);
+
+
     }
 
-    public void setParameterType(Class<?> parameterType) {
-        this.parameterType = parameterType;
-    }
-
-    public BoundSQLSource getBoudSQL() {
-        return boudSQL;
-    }
-
-    public void setBoudSQL(BoundSQLSource boudSQL) {
-        this.boudSQL = boudSQL;
+    public SqlSource getSqlSource() {
+        return sqlSource;
     }
 
     public ResultMap getResultMap() {

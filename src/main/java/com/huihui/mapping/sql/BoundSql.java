@@ -1,4 +1,4 @@
-package com.huihui.mapping;
+package com.huihui.mapping.sql;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,20 +6,17 @@ import java.util.List;
 /**
  * Created by hadoop on 2015/7/1 0001.
  */
-public class BoundSQLSource {
+public class BoundSql {
     private String sql ;
     private List<String> parameterList = new ArrayList<>();
 
-    public BoundSQLSource() {
+    public BoundSql() {
     }
 
-    public BoundSQLSource(String sql) {
+    public BoundSql(String sql) {
         this.sql = sql;
     }
 
-    public void addParameter(Integer num,String propertyName){
-        parameterList.add(num,propertyName);
-    }
     public void addParameter(String propertyName){
         parameterList.add(propertyName);
     }

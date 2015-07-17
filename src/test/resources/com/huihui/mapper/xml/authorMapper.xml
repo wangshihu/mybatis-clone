@@ -3,6 +3,15 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.huihui.mapper.dao.AuthorMapper">
+    <insert id="testInsertList" parameterType="HashMap">
+        INSERT INTO _author(username,password,blog_id) VALUES
+        <foreach collection="authors" item="author" separator=",">
+            (#{author.username},#{author.password},#{author.blog.id})
+        </foreach>
+    </insert>
+
+
+
     <resultMap id="baseAuthor" type="Author">
         <id property="id" column="id"></id>
         <result property="username" column="username"></result>
@@ -11,6 +20,5 @@
     <select id="testOneParameter" parameterType="int" resultMap="baseAuthor">
        SELECT * FROM _author where id = #{id};
     </select>
-
 
 </mapper>

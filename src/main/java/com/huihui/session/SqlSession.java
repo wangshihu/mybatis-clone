@@ -4,7 +4,12 @@ import com.huihui.exceptions.ExceptionFactory;
 import com.huihui.exceptions.PersistenceException;
 import com.huihui.excutor.DefaultExcutor;
 import com.huihui.excutor.Excutor;
-import com.huihui.mapping.*;
+import com.huihui.mapping.MappedStatement;
+import com.huihui.mapping.ResultMap;
+import com.huihui.mapping.ResultMapping;
+import com.huihui.mapping.ResultSetWrapper;
+import com.huihui.mapping.sql.BoundSql;
+import com.huihui.reflection.OgnlCache;
 import com.huihui.type.TypeHandler;
 import org.apache.commons.beanutils.PropertyUtils;
 
@@ -14,7 +19,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by hadoop on 2015/7/4 0004.
@@ -36,32 +40,23 @@ public class SqlSession {
         return configuration;
     }
 
-    public PreparedStatement getPreparedStatement(Connection connection, Object[] args, BoundSQLSource boundSQL) {
+    public PreparedStatement getPreparedStatement(Connection connection, Object[] args, MappedStatement mappedStatement) {
+        DynamincContext context = new DynamincContext(args[0]);
+        BoundSql boundSql = mappedStatement.getBoudSQL(context);
         PreparedStatement pstmt = null;
         try {
-            pstmt = connection.prepareStatement(boundSQL.getSql());
-            if (!boundSQL.getParameterList().isEmpty()) {//如果parameterList不为空填充参数
+            pstmt = connection.prepareStatement(boundSql.getSql());
+            if (!boundSql.getParameterList().isEmpty()) {//如果parameterList不为空填充参数
                 if(args.length!=1)//@TODO 多参数方法。
                     throw new PersistenceException("do not support for args.length>1 method");
-                int i = 1;
-                if(args[0] instanceof Map){//如果能转换成map,多参数
-                    Map<String,Object> map = (Map<String, Object>) args[0];
-                    for (String parameter : boundSQL.getParameterList()) {
-                        Object parameterValue = map.get(parameter);
-                        TypeHandler handler = configuration.getTypeHandler(parameterValue.getClass());
-                        handler.setParameter(pstmt, i, parameterValue, null);
-                        i++;
-                    }
-                }else {
-                    if(boundSQL.getParameterList().size()==1){
-                        Object parameterValue = args[0];
-                        TypeHandler handler = configuration.getTypeHandler(parameterValue.getClass());
-                        handler.setParameter(pstmt, i, parameterValue, null);
-                    }else{//如果需要的parameter数量不等于提供的参数。
-                        throw new PersistenceException("require parameters not equals parameters");
-                    }
-                }
+                int i=1;
+                for (String parameter : boundSql.getParameterList()) {
+                    Object parameterValue = OgnlCache.getValue(parameter,context.getBindings());
 
+                    TypeHandler handler = configuration.getTypeHandler(parameterValue.getClass());
+                    handler.setParameter(pstmt, i, parameterValue, null);
+                    i++;
+                }
             }
         } catch (SQLException e) {
             throw ExceptionFactory.wrapException("", e);
@@ -73,7 +68,8 @@ public class SqlSession {
      * 查询单个
      */
     public Object selectOne(Connection connection, Object[] args, MappedStatement mappedStatement) {
-        PreparedStatement pstmt = getPreparedStatement(connection, args, mappedStatement.getBoudSQL());
+
+        PreparedStatement pstmt = getPreparedStatement(connection, args, mappedStatement);
         ResultMap resultMap = mappedStatement.getResultMap();
         Object result = null;
         try {
@@ -91,7 +87,7 @@ public class SqlSession {
 
     public Object selectMany(Connection connection, Object[] args, MappedStatement mappedStatement) {
         List<Object> resultList = new ArrayList<>();
-        PreparedStatement pstmt = getPreparedStatement(connection, args, mappedStatement.getBoudSQL());
+        PreparedStatement pstmt = getPreparedStatement(connection, args, mappedStatement);
         ResultMap resultMap = mappedStatement.getResultMap();
         try {
             ResultSet resultSet = pstmt.executeQuery();
@@ -109,7 +105,7 @@ public class SqlSession {
     }
 
     public Object insert(Connection connection, Object[] args, MappedStatement mappedStatement) {
-        PreparedStatement pstmt = getPreparedStatement(connection, args, mappedStatement.getBoudSQL());
+        PreparedStatement pstmt = getPreparedStatement(connection, args, mappedStatement);
         int result = 0;
         try {
             result = pstmt.executeUpdate();
@@ -156,4 +152,12 @@ public class SqlSession {
     }
 
 
+    public Object delete(Connection connection, Object[] args, MappedStatement statement) {
+        return null;
+    }
+
+    public Object update(Connection connection, Object[] args, MappedStatement statement) {
+
+        return null;
+    }
 }
